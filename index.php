@@ -34,7 +34,7 @@ $app->get('/admin', function() { // rota para pagina principal: index dentro de 
 
 });
 
-$app->get('/admin/login', function() { // rota para o GET
+$app->get('/admin/login', function() { // rota para o GET login
 
 	$page = new PageAdmin([	// desabilitando do construtor o header e o footer
 		"header"=>false,
@@ -63,7 +63,7 @@ $app->get('/admin/logout', function(){ // rota pata logout (finalizando a sessao
 
 });
 
-$app->get("/admin/users",function(){//listar todos usuarios
+$app->get("/admin/users",function(){// rota para listar todos usuarios
 
 	User::verifyLogin();
 
@@ -78,7 +78,7 @@ $app->get("/admin/users",function(){//listar todos usuarios
 });
 
 
-$app->get("/admin/users/create", function(){//Criando usuario
+$app->get("/admin/users/create", function(){// rota para criar usuarios
 
 	User::verifyLogin();
 
@@ -88,7 +88,7 @@ $app->get("/admin/users/create", function(){//Criando usuario
 
 });
 
-$app->get("/admin/users/:iduser/delete", function($iduser){ //deletar usuario
+$app->get("/admin/users/:iduser/delete", function($iduser){ // rota para deletar usuario
 
 	User::verifyLogin();
 
@@ -103,7 +103,7 @@ $app->get("/admin/users/:iduser/delete", function($iduser){ //deletar usuario
 	
 });
 
-$app->get("/admin/users/:iduser",function($iduser){//editar usuario
+$app->get("/admin/users/:iduser",function($iduser){// rota para editar usuario
 
 	User::verifyLogin();
 
@@ -119,9 +119,8 @@ $app->get("/admin/users/:iduser",function($iduser){//editar usuario
 
 });
 
-//***************** POST *********************
 
-$app->post("/admin/users/create", function(){
+$app->post("/admin/users/create", function(){ // rota para criar no banco via post
 
 	User::verifyLogin();
 
@@ -147,7 +146,7 @@ $app->post("/admin/users/create", function(){
 
 });
 
-$app->post("/admin/users/:iduser", function($iduser){
+$app->post("/admin/users/:iduser", function($iduser){ // rota para editar no banco via post
 
 	User::verifyLogin();
 
@@ -166,6 +165,79 @@ $app->post("/admin/users/:iduser", function($iduser){
 
 });
 
-$app->run();
+$app->get("/admin/forgot",function(){ // rota via get para o tela esqueci a senha
 
- ?>
+	$page = new PageAdmin([	
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot");
+});
+
+
+$app->post("/admin/forgot", function(){ // rota para o forgot
+
+	$user = User::getForgot($_POST["email"]);
+
+	header("Location: /admin/forgot/sent");
+	exit;
+
+});
+
+$app->get("/admin/forgot/sent", function(){
+
+	$page = new PageAdmin([	
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-sent");
+
+
+});
+
+$app->get("/admin/forgot/reset", function()
+{
+	$user = User::validForgotDecrypt($_GET["code"]);
+
+	$page = new PageAdmin([	
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+});
+
+$app->post("/admin/forgot/reset", function()
+{
+
+	$forgot = User::validForgotDecrypt($_POST["code"]);
+
+	User::setFogotUsed($forgot["idrecovery"]);
+
+	$user = new User();
+
+	$user->get((int)$forgot["iduser"]);
+
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT, [
+		"cost"=>12
+	]);
+
+	$user->setPassword($password);
+
+	$page = new PageAdmin([	
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-reset-success");
+
+});
+
+
+$app->run();	// rota para rodar o projeto
+?>

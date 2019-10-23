@@ -60,7 +60,7 @@
 
     
 
-    <a href="#">I forgot my password</a><br>
+    <a href="/admin/forgot">Esqueci a senha</a><br>
     <a href="register.html" class="text-center">Register a new membership</a>
 
   </div>

@@ -52,7 +52,8 @@ class User extends Model {
 		 !(int)$_SESSION[User::SESSION]["iduser"] > 0 
 		 ||
 		 (bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin
-		) {
+			
+		){
 			header("Location: /admin/login");
 			exit;
 		}
